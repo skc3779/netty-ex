@@ -1,0 +1,101 @@
+project.group = 'io.kangchun'
+project.version = '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+ext {
+    javaVersion = 1.8
+    slf4jVersion = '1.7.6'
+    springVersion = '4.2.6.RELEASE'
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url 'http://repo.springsource.org/plugins-release' }
+        maven { url 'http://repo.spring.io/milestone' }
+    }
+
+    dependencies {
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'maven'
+    apply plugin: 'propdeps'
+    apply plugin: 'propdeps-maven'
+    apply plugin: 'propdeps-idea'
+    apply plugin: 'propdeps-eclipse'
+    apply plugin: 'war'
+
+    sourceCompatibility = rootProject.ext.javaVersion
+    targetCompatibility = rootProject.ext.javaVersion
+
+    /* start sourceSets */
+    String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+    if (hostname.endsWith('.local')) {
+        hostname = hostname.replace(".local", '')
+    }
+
+    sourceSets {
+        main.java.srcDirs = ['src/main/java']
+        test.java.srcDirs = ['src/test/java']
+        main.resources.srcDirs = ['src/main/resources', "src/main/resources-" + hostname]
+        test.resources.srcDirs = ['src/test/resources', "src/test/resources-" + hostname]
+    }
+
+    sourceSets.all {
+        set ->
+            set.allSource.srcDirs.each {
+                if (!it.exists()) {
+                    it.mkdirs()
+                }
+            }
+    }
+    /* end sourceSets */
+
+    /* start logs folder create */
+    def logsDir = new File('logs')
+    if (!logsDir.isDirectory()) {
+        logsDir.mkdirs()
+    }
+    /* end logs folder create */
+
+    dependencies {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+            jcenter()
+        }
+
+        /* netty */
+        // http://mvnrepository.com/artifact/io.netty/netty-all
+        compile "io.netty:netty-all:4.1.0.Final"
+        compile group: 'commons-codec', name: 'commons-codec', version: '1.10';
+
+        /* logback */
+        compile "org.slf4j:slf4j-api:${rootProject.ext.slf4jVersion}"
+        compile "org.slf4j:jcl-over-slf4j:${rootProject.ext.slf4jVersion}"
+        compile "org.slf4j:log4j-over-slf4j:${rootProject.ext.slf4jVersion}"
+        compile "org.slf4j:slf4j-api:${rootProject.ext.slf4jVersion}"
+        compile 'ch.qos.logback:logback-classic:1.0.13'
+        compile 'ch.qos.logback:logback-core:1.0.13'
+
+        provided 'org.projectlombok:lombok:1.12.6'
+
+        /* test */
+        testCompile "junit:junit:4.11"
+        testCompile 'org.mockito:mockito-all:1.10.8'
+        testCompile 'org.hamcrest:hamcrest-all:1.3'
+        testCompile "org.springframework:spring-test:${rootProject.ext.springVersion}"
+
+
+
+        [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+    }
+}
