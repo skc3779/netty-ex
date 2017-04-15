@@ -1,0 +1,13 @@
+### Example user template
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+build
+logs/
+src/main/resources-seokangchunui-imac/
+src/main/webapp/
+src/test/resources-seokangchunui-imac/
+src/test/resources/
